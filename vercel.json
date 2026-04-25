@@ -1,7 +1,7 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "pnpm --filter server install && pnpm --filter server build",
+  "outputDirectory": "server/dist",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "builds": [
     {
       "src": "server/src/index.ts",
