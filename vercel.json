@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd server && npm install && npm run build",
-  "outputDirectory": "server/dist",
-  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "builds": [
     {
       "src": "server/src/index.ts",
