@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "buildCommand": "cd server && npm install && npm run build",
+  "outputDirectory": "server/dist",
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"
+    }
+  ]
+}
