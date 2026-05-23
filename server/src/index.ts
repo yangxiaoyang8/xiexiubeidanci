@@ -3,15 +3,7 @@ import cors from "cors";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import vocabBooksRouter from './routes/vocab-books';
-import wordsRouter from './routes/words';
-import novelsRouter from './routes/novels';
-import userNovelsRouter from './routes/user-novels';
-import ttsRouter from './routes/tts';
-import novelUploadRouter from './routes/novel-upload';
-import audioPackRouter from './routes/audio-pack';
-import adminRouter from './routes/admin';
-import authRouter from './routes/auth';
+import type { RequestHandler, Router } from "express";
 
 // ES模块中获取__dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +11,20 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 9091;
+
+function lazyRouter(loader: () => Promise<{ default: Router }>): RequestHandler {
+  let routerPromise: Promise<Router> | null = null;
+
+  return async (req, res, next) => {
+    try {
+      routerPromise ??= loader().then((module) => module.default);
+      const router = await routerPromise;
+      (router as any).handle(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
 
 // Middleware
 app.use(cors());
@@ -32,15 +38,15 @@ app.get('/api/v1/health', (req, res) => {
 });
 
 // 注册路由
-app.use('/api/v1/vocab-books', vocabBooksRouter);
-app.use('/api/v1/words', wordsRouter);
-app.use('/api/v1/novels', novelsRouter);
-app.use('/api/v1/user-novels', userNovelsRouter);
-app.use('/api/v1/tts', ttsRouter);
-app.use('/api/v1/novel-upload', novelUploadRouter);
-app.use('/api/v1/audio-pack', audioPackRouter);
-app.use('/api/v1/admin', adminRouter);
-app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/vocab-books', lazyRouter(() => import('./routes/vocab-books.js')));
+app.use('/api/v1/words', lazyRouter(() => import('./routes/words.js')));
+app.use('/api/v1/novels', lazyRouter(() => import('./routes/novels.js')));
+app.use('/api/v1/user-novels', lazyRouter(() => import('./routes/user-novels.js')));
+app.use('/api/v1/tts', lazyRouter(() => import('./routes/tts.js')));
+app.use('/api/v1/novel-upload', lazyRouter(() => import('./routes/novel-upload.js')));
+app.use('/api/v1/audio-pack', lazyRouter(() => import('./routes/audio-pack.js')));
+app.use('/api/v1/admin', lazyRouter(() => import('./routes/admin.js')));
+app.use('/api/v1/auth', lazyRouter(() => import('./routes/auth.js')));
 
 // 托管前端静态文件（生产环境）
 // 开发环境：前端文件在 ../../client/dist
@@ -68,6 +74,10 @@ app.get('*', (req, res, next) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}/`);
-});
+if (process.env.RUN_SERVER === '1') {
+  app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}/`);
+  });
+}
+
+export default app;

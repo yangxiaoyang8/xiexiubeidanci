@@ -1,17 +1,44 @@
 {
+  "version": 2,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "cd server && npm run build",
-  "outputDirectory": "server/dist",
+  "buildCommand": "cd client && npx expo export --platform web --output-dir ../public && cd ../server && pnpm run build",
   "builds": [
     {
-      "src": "server/src/index.ts",
+      "src": "api/index.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/_expo/(.*)",
+      "dest": "/public/_expo/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/public/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/public/favicon.ico"
+    },
+    {
+      "src": "/metadata.json",
+      "dest": "/public/metadata.json"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/server/src/index.ts"
+      "dest": "/public/index.html"
     }
   ]
 }

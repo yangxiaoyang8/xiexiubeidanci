@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node build.js",
     "dev": "bash ../.cozeproj/scripts/server_dev_run.sh",
-    "start": "NODE_ENV=production PORT=${PORT:-5000} node dist/index.js",
+    "preinstall": "npx only-allow pnpm",
+    "start": "NODE_ENV=production RUN_SERVER=1 PORT=${PORT:-5000} node dist/index.js",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
